@@ -1,0 +1,39 @@
+version: "3"
+services:
+  patient-app:
+    build: ./clinic-app-apis
+    image: patient-app
+    restart: on-failure
+    ports:
+      - "4000:4000"
+    networks:
+      - patient-mysql
+    depends_on:
+      - mysqldb
+ 
+  mysqldb:
+    image: mysql:8
+    restart: unless-stopped
+    networks:
+      - patient-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=clinic
+    ports:
+      - "3306:3306"
+
+  client:
+    environment:
+      - WDS_SOCKET_PORT=0
+    build: ./clinic
+    image: client
+    restart: on-failure
+    ports:
+      - "3000:3000"
+    networks:
+      - patient-mysql
+    depends_on:
+      - patient-app
+
+networks:
+  patient-mysql:
